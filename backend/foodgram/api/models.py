@@ -106,6 +106,7 @@ class IngridientAmount(models.Model):
 
     class Meta:
         verbose_name = 'Количество ингридиентов в рецепте'
+        verbose_name_plural = 'Количество ингридиентов в рецепте'
 
     def __str__(self):
         return (f'{self.ingridient} '
@@ -146,9 +147,9 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Список покупок'
-        verbose_name_plural = 'Списки покупок'
+        verbose_name = 'Список избранных рецептов'
+        verbose_name_plural = 'Списки избранных рецептов'
 
     def __str__(self):
         return (f'{self.recipe} в списке '
-                f'покупок пользователя {self.user}')
+                f'избранного пользователя {self.user}')

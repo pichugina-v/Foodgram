@@ -4,7 +4,8 @@ from .models import Tag, Ingridient, Recipe
 from .serializers import (
     TagSerializer,
     IngridientSerializer,
-    RecipeSerializer
+    RecipeSerializer,
+    RecipeCreateSerializer
 )
 
 
@@ -21,3 +22,8 @@ class IngridientViewSet(ModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create' or self.action == 'update':
+            return RecipeCreateSerializer
+        return RecipeSerializer
