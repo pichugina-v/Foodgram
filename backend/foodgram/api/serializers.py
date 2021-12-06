@@ -1,5 +1,5 @@
-from django.db.models.fields import IntegerField
 from rest_framework import serializers
+from rest_framework.fields import ReadOnlyField
 
 from users.serializers import UserSerializer
 from .models import Tag, Ingridient, IngridientAmount, Recipe
@@ -18,8 +18,7 @@ class IngridientSerializer(serializers.ModelSerializer):
 
 
 class IngridientAmountSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
-        read_only=True,
+    id = serializers.ReadOnlyField(
         source='ingridient.id'
     )
     name = serializers.ReadOnlyField(
@@ -35,15 +34,16 @@ class IngridientAmountSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'measurement_unit',
-            'amount'
+            # 'amount'
         )
 
 
-class IngridientRecipeCreateSerializer(serializers.ModelSerializer):
+class RecipeIngridientCreateSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
+        source='ingridient',
         queryset=Ingridient.objects.all()
     )
-    amount = IntegerField()
+    amount = serializers.IntegerField()
 
     class Meta:
         model = IngridientAmount
@@ -61,11 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(
         read_only=True
     )
-    ingridients = IngridientAmountSerializer(
-        source='ingridientamount_set',
-        read_only=True,
-        many=True
-    )
+    ingridients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -84,6 +80,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    def get_ingridients(self, obj):
+        ingridients = Ingridient.objects.filter(recipe=obj)
+        return IngridientAmountSerializer(ingridients, many=True).data
+
     def get_is_favorited(self, obj):
         return True
 
@@ -95,11 +95,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
-    #ingridients = IngridientRecipeCreateSerializer(
-    #    many=True
-    #)
-    tags = serializers.SlugRelatedField(
-        slug_field='id',
+    ingridients = RecipeIngridientCreateSerializer(
+        source='ingridientamount_set',
+        many=True,
+    )
+    tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
     )
@@ -110,9 +110,48 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'id',
             'tags',
             'author',
-            #'ingridients',
+            'ingridients',
             'name',
-            #'image',
+            # 'image',
             'text',
             'cooking_time'
         )
+
+    def create(self, validated_data):
+        ingridients_data = validated_data.pop(
+            'ingridientamount_set'
+        )
+        tags_data = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        for ingridient in ingridients_data:
+            IngridientAmount.objects.create(
+                ingridient=ingridient['ingridient'],
+                amount=ingridient['amount'],
+                recipe=recipe
+            )
+        recipe.tags.set(tags_data)
+        return recipe
+
+    def update(self, instance, validated_data):
+        ingridients_data = validated_data.pop(
+            'ingridientamount_set'
+        )
+        tags_data = validated_data.pop('tags')
+        instance.name = validated_data.get('name', instance.name)
+        instance.author = validated_data.get('author', instance.author)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get(
+            'cooking_time', instance.cooking_time
+        )
+        instance.image = validated_data.get('image', instance.image)
+        ingridients_list = []
+        for ingridient in ingridients_data:
+            ingridient = Ingridient.objects.update_or_create(
+                name=ingridient['ingridient'],
+                ingridientamount=ingridient['amount'],
+                recipe=instance)
+            ingridients_list.append(ingridient)
+        instance.ingredients = ingridients_list
+        instance.tags.set(tags_data)
+        instance.save()
+        return instance

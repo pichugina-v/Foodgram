@@ -42,6 +42,8 @@ class Ingridient(models.Model):
 
     def __str__(self):
         return self.name
+        # return (f'{self.name}, '
+        #         f'{self.measurement_unit}')
 
 
 class Recipe(models.Model):
@@ -98,7 +100,7 @@ class IngridientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество'

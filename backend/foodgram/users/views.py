@@ -1,26 +1,22 @@
-from django.contrib.auth.models import User
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from .serializers import FollowSerializer, UserSerializer
+from .serializers import FollowSerializer
 from .models import Follow, User
 
 
 class UserViewSet(UserViewSet):
-    queryset = User.objects.all()
-    serializer_class = FollowSerializer
-
     @action(detail=False,
             methods=['get'])
     def subscriptions(self, request):
         followings = User.objects.filter(following__user=request.user)
-        serializer = UserSerializer(
+        serializer = FollowSerializer(
             followings,
-            many=True,
-            context={'request': request}
+            context={'request': request},
+            many=True
         )
         return Response(serializer.data)
 
@@ -31,7 +27,10 @@ class UserViewSet(UserViewSet):
         author = get_object_or_404(User, id=id)
         if request.method == 'GET':
             Follow.objects.create(user=user, author=author)
-            serializer = FollowSerializer(author)
+            serializer = FollowSerializer(
+                author,
+                context={'request': request}
+            )
             return Response(serializer.data)
         get_object_or_404(Follow, user=user, author=author).delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)

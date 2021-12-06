@@ -1,6 +1,16 @@
 from django.contrib import admin
 
-from .models import Tag, Ingridient, IngridientAmount, Recipe
+from .models import (
+    Tag,
+    Ingridient,
+    IngridientAmount,
+    Recipe,
+)
+
+
+class Recipe_inline(admin.TabularInline):
+    model = IngridientAmount
+    extra = 4
 
 
 @admin.register(Tag)
@@ -19,6 +29,7 @@ class IngridientAdmin(admin.ModelAdmin):
         'id', 'name',
         'measurement_unit'
     )
+    inlines = (Recipe_inline,)
     search_fields = ('name',)
     list_filter = ('measurement_unit',)
 
@@ -39,5 +50,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'text', 'cooking_time',
         'pub_date'
     )
+    inlines = (Recipe_inline,)
     search_fields = ('name', 'tags', 'author')
     list_filter = ('name', 'author')
