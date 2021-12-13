@@ -1,6 +1,5 @@
-import re
+from django.db import models
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from users.serializers import UserSerializer
 from .models import Favorite, Tag, Ingridient, IngridientAmount, Recipe
@@ -158,3 +157,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             )
         instance.tags.set(tags_data)
         return instance
+
+
+class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
