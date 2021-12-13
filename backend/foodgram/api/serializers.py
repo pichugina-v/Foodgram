@@ -1,8 +1,9 @@
+import re
 from rest_framework import serializers
-from rest_framework.fields import ReadOnlyField
+from rest_framework.validators import UniqueTogetherValidator
 
 from users.serializers import UserSerializer
-from .models import Tag, Ingridient, IngridientAmount, Recipe
+from .models import Favorite, Tag, Ingridient, IngridientAmount, Recipe
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -34,7 +35,7 @@ class IngridientAmountSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'measurement_unit',
-            # 'amount'
+            'amount'
         )
 
 
@@ -81,11 +82,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
     def get_ingridients(self, obj):
-        ingridients = Ingridient.objects.filter(recipe=obj)
+        ingridients = obj.ingridientamount_set.all()
         return IngridientAmountSerializer(ingridients, many=True).data
 
     def get_is_favorited(self, obj):
-        return True
+        user = self.context['request'].user
+        if Favorite.objects.filter(user=user, recipe=obj).exists():
+            return True
+        return False
 
     def get_is_in_shopping_cart(self, obj):
         return True
@@ -144,14 +148,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.image = validated_data.get('image', instance.image)
-        ingridients_list = []
-        for ingridient in ingridients_data:
-            ingridient = Ingridient.objects.update_or_create(
-                name=ingridient['ingridient'],
-                ingridientamount=ingridient['amount'],
-                recipe=instance)
-            ingridients_list.append(ingridient)
-        instance.ingredients = ingridients_list
-        instance.tags.set(tags_data)
         instance.save()
+        IngridientAmount.objects.filter(recipe=instance).delete()
+        for ingridient in ingridients_data:
+            ingridient = IngridientAmount.objects.create(
+                ingridient=ingridient['ingridient'],
+                amount=ingridient['amount'],
+                recipe=instance
+            )
+        instance.tags.set(tags_data)
         return instance
