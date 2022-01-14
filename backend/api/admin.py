@@ -2,14 +2,14 @@ from django.contrib import admin
 
 from .models import (
     Tag,
-    Ingridient,
-    IngridientAmount,
+    Ingredient,
+    RecipeIngredientAmount,
     Recipe,
 )
 
 
 class Recipe_inline(admin.TabularInline):
-    model = IngridientAmount
+    model = RecipeIngredientAmount
     extra = 4
 
 
@@ -23,8 +23,8 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('name', 'slug')
 
 
-@admin.register(Ingridient)
-class IngridientAdmin(admin.ModelAdmin):
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'name',
         'measurement_unit'
@@ -34,10 +34,10 @@ class IngridientAdmin(admin.ModelAdmin):
     list_filter = ('measurement_unit',)
 
 
-@admin.register(IngridientAmount)
-class IngridientAmountAdmin(admin.ModelAdmin):
+@admin.register(RecipeIngredientAmount)
+class RecipeIngredientAmountAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'ingridient',
+        'id', 'ingredient',
         'recipe', 'amount'
     )
 

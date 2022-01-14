@@ -40,17 +40,6 @@ class UserSerializer(serializers.ModelSerializer):
         return False
 
 
-class FollowRecipeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
-        )
-
-
 class FollowSerializer(serializers.ModelSerializer):
     is_subscribed = SerializerMethodField()
     recipes = SerializerMethodField()
@@ -76,8 +65,9 @@ class FollowSerializer(serializers.ModelSerializer):
         return False
 
     def get_recipes(self, obj):
+        from api.serializers import RecipeShortenedSerializer
         recipes = Recipe.objects.filter(author=obj)
-        return FollowRecipeSerializer(
+        return RecipeShortenedSerializer(
             recipes,
             many=True,
         ).data

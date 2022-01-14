@@ -26,7 +26,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Ingridient(models.Model):
+class Ingredient(models.Model):
     name = models.CharField(
         verbose_name='Название',
         max_length=200
@@ -54,7 +54,8 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название',
-        max_length=200
+        max_length=200,
+        unique=True
     )
     image = models.ImageField(
         verbose_name='Картинка',
@@ -63,9 +64,9 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Описание'
     )
-    ingridients = models.ManyToManyField(
-        Ingridient,
-        through='IngridientAmount',
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredientAmount',
         verbose_name='Ингридиенты'
     )
     tags = models.ManyToManyField(
@@ -91,9 +92,9 @@ class Recipe(models.Model):
                 f'{self.author}')
 
 
-class IngridientAmount(models.Model):
-    ingridient = models.ForeignKey(
-        Ingridient,
+class RecipeIngredientAmount(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
         verbose_name='Ингридиент',
         on_delete=models.CASCADE
     )
@@ -111,7 +112,7 @@ class IngridientAmount(models.Model):
         verbose_name_plural = 'Количество ингридиентов в рецепте'
 
     def __str__(self):
-        return (f'{self.ingridient} '
+        return (f'{self.ingredient} '
                 f'{self.amount} в {self.recipe}')
 
 
