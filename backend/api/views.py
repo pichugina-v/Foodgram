@@ -16,6 +16,7 @@ from .models import (
     Ingredient,
     Recipe
 )
+from foodgram.paginators import RecipePagination
 from .serializers import (
     TagSerializer,
     IngredientSerializer,
@@ -35,14 +36,13 @@ class IngredientViewSet(ModelViewSet):
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name']
 
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['author', 'is_favorited', 'is_in_shopping_cart', 'tags']
+    pagination_class = RecipePagination
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update':

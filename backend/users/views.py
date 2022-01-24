@@ -5,22 +5,30 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from foodgram.paginators import RecipePagination
 from .serializers import FollowSerializer
 from .models import Follow, User
 
 
 class UserViewSet(UserViewSet):
     permission_classes = [IsAuthenticated]
+    pagination_class = RecipePagination
 
     @action(detail=False,
             methods=['get'])
     def subscriptions(self, request):
-        followings = User.objects.filter(following__user=request.user)
+        followings = self.paginate_queryset(
+            User.objects.filter(
+                following__user=request.user
+                )
+        )
         serializer = FollowSerializer(
             followings,
             context={'request': request},
             many=True
         )
+        if followings is not None:
+            return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
 
     @action(detail=True,

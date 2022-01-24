@@ -68,7 +68,12 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         from api.serializers import RecipeShortenedSerializer
-        recipes = Recipe.objects.filter(author=obj)
+        recipes_limit = self.context['request'].query_params.get(
+            'recipes_limit', None
+        )
+        recipes = Recipe.objects.filter(
+            author=obj
+        )[:int(recipes_limit)]
         return RecipeShortenedSerializer(
             recipes,
             many=True,
