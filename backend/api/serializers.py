@@ -1,13 +1,13 @@
-from django.core import validators
 from rest_framework import serializers
 
 from users.serializers import UserSerializer
 from .models import (
     Favorite,
-    Tag,
     Ingredient,
+    Recipe,
     RecipeIngredientAmount,
-    Recipe
+    Tag,
+    ShoppingList
 )
 
 
@@ -103,12 +103,18 @@ class RecipeFullSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
-        if Favorite.objects.filter(user=user, recipe=obj).exists():
+        if (user.id is not None and Favorite.objects.filter(
+                user=user, recipe=obj).exists()):
             return True
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        return True
+        user = self.context['request'].user
+        if (user.id is not None and ShoppingList.objects.filter(
+                user=user, recipe=obj
+           ).exists()):
+            return True
+        return False
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -157,7 +163,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
         tags_data = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
-        print(validated_data.pop('author'))
         return self.set_tags_and_ingredients(
             tags_data,
             ingredients_data,
@@ -191,4 +196,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        return True
+        user = self.context['request'].user
+        if ShoppingList.objects.filter(user=user, recipe=obj).exists():
+            return True
+        return False

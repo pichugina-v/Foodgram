@@ -1,10 +1,21 @@
-from rest_framework import serializers, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
-from .models import Favorite, ShoppingList, Tag, Ingredient, Recipe
+from .filters import (
+    RecipeFilter,
+    IngredientFilter
+)
+from .models import (
+    Favorite,
+    ShoppingList,
+    Tag,
+    Ingredient,
+    Recipe
+)
 from .serializers import (
     TagSerializer,
     IngredientSerializer,
@@ -22,10 +33,16 @@ class TagViewSet(ModelViewSet):
 class IngredientViewSet(ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filterset_class = IngredientFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name']
 
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
+    filterset_class = RecipeFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['author', 'is_favorited', 'is_in_shopping_cart', 'tags']
 
     def get_serializer_class(self):
         if self.action == 'create' or self.action == 'update':
