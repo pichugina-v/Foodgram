@@ -73,7 +73,12 @@ class FollowSerializer(serializers.ModelSerializer):
         )
         recipes = Recipe.objects.filter(
             author=obj
-        )[:int(recipes_limit)]
+        )
+        if recipes_limit is not None:
+            return RecipeShortenedSerializer(
+                recipes[:int(recipes_limit)],
+                many=True,
+            ).data
         return RecipeShortenedSerializer(
             recipes,
             many=True,

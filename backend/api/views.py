@@ -1,9 +1,15 @@
+from base64 import encode
+import io
+
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from .filters import (
     RecipeFilter,
@@ -11,6 +17,7 @@ from .filters import (
 )
 from .models import (
     Favorite,
+    RecipeIngredientAmount,
     ShoppingList,
     Tag,
     Ingredient,
@@ -29,6 +36,7 @@ from .serializers import (
 class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(ModelViewSet):
@@ -36,6 +44,7 @@ class IngredientViewSet(ModelViewSet):
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
     filter_backends = [DjangoFilterBackend]
+    pagination_class = None
 
 
 class RecipeViewSet(ModelViewSet):
@@ -45,19 +54,19 @@ class RecipeViewSet(ModelViewSet):
     pagination_class = RecipePagination
 
     def get_serializer_class(self):
-        if self.action == 'create' or self.action == 'update':
-            return RecipeCreateSerializer
-        return RecipeFullSerializer
+        if self.request.method in SAFE_METHODS:
+            return RecipeFullSerializer
+        return RecipeCreateSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
     @action(detail=True,
-            methods=['get', 'delete'])
+            methods=['post', 'delete'])
     def favorite(self, request, pk=None):
         user = request.user
-        recipe = Recipe.objects.get(id=pk)
-        if request.method == 'GET':
+        recipe = Recipe.objects.get(pk=pk)
+        if request.method == 'POST':
             Favorite.objects.create(
                 user=user,
                 recipe=recipe
@@ -68,11 +77,11 @@ class RecipeViewSet(ModelViewSet):
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
-            methods=['get', 'delete'])
+            methods=['post', 'delete'])
     def shopping_cart(self, request, pk=None):
         user = request.user
-        recipe = Recipe.objects.get(id=pk)
-        if request.method == 'GET':
+        recipe = Recipe.objects.get(pk=pk)
+        if request.method == 'POST':
             ShoppingList.objects.create(
                 user=user,
                 recipe=recipe
@@ -81,3 +90,48 @@ class RecipeViewSet(ModelViewSet):
             return Response(serializer.data)
         get_object_or_404(ShoppingList, user=user, recipe=recipe).delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False,
+            methods=['get'])
+    def download_shopping_cart(self, request):
+        buffer = io.BytesIO()
+        pdf_object = canvas.Canvas(buffer)
+        result = {}
+        recipes_in_user_shopping_list = Recipe.objects.filter(
+            shoppinglist__user=request.user
+        )
+        for recipe in recipes_in_user_shopping_list:
+            ingredients = RecipeIngredientAmount.objects.filter(
+                recipe=recipe
+            )
+            for ingredient in ingredients:
+                name, unit, amount = (
+                    ingredient.ingredient.name,
+                    ingredient.ingredient.measurement_unit,
+                    ingredient.amount
+                )
+                if name in result.keys():
+                    result[name]['amount'] += amount
+                else:
+                    result[name] = {
+                        'amount': amount,
+                        'unit': unit
+                    }
+        height = 800
+        for name in result.keys():
+            pdf_object.drawString(
+                1,
+                height,
+                str(
+                    f'{name} - {result[name]["amount"]} {result[name]["unit"]}\n'
+                ).encode('utf-8')
+            )
+            height -= 20
+        pdf_object.showPage()
+        pdf_object.save()
+        buffer.seek(0)
+        return FileResponse(
+            buffer,
+            as_attachment=True,
+            filename='Список игредиентов.pdf'
+        )

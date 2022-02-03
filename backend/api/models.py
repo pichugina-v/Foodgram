@@ -1,3 +1,4 @@
+import re
 from colorfield.fields import ColorField
 
 from django.db import models
@@ -87,6 +88,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        ordering = ['pub_date']
 
     def __str__(self):
         return (f'{self.name}, '
@@ -99,20 +101,22 @@ class RecipeIngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Ингридиент',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='ingredient_in_recipe'
     )
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
+        related_name='ingredient_in_recipe'
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество'
     )
 
     class Meta:
-        verbose_name = 'Количество ингридиентов в рецепте'
-        verbose_name_plural = 'Количество ингридиентов в рецепте'
+        verbose_name = 'Количество ингредиентов в рецепте'
+        verbose_name_plural = 'Количество ингредиентов в рецепте'
 
     def __str__(self):
         return (f'{self.ingredient} '

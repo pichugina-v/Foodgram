@@ -32,11 +32,11 @@ class UserViewSet(UserViewSet):
         return Response(serializer.data)
 
     @action(detail=True,
-            methods=['get', 'delete'])
+            methods=['post', 'delete'])
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
-        if request.method == 'GET':
+        if request.method == 'POST':
             Follow.objects.create(user=user, author=author)
             serializer = FollowSerializer(
                 author,

@@ -16,8 +16,10 @@ class Recipe_inline(admin.TabularInline):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name',
-        'hex_code', 'slug'
+        'id',
+        'name',
+        'hex_code',
+        'slug'
     )
     search_fields = ('name', 'slug')
     list_filter = ('name', 'slug')
@@ -26,7 +28,8 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name',
+        'id',
+        'name',
         'measurement_unit'
     )
     inlines = (Recipe_inline,)
@@ -37,17 +40,22 @@ class IngredientAdmin(admin.ModelAdmin):
 @admin.register(RecipeIngredientAmount)
 class RecipeIngredientAmountAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'ingredient',
-        'recipe', 'amount'
+        'id',
+        'ingredient',
+        'recipe',
+        'amount'
     )
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'author',
-        'name', 'image',
-        'text', 'cooking_time',
+        'id',
+        'author',
+        'name',
+        'image',
+        'text',
+        'cooking_time',
         'pub_date'
     )
     inlines = (Recipe_inline,)

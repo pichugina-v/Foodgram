@@ -6,16 +6,22 @@ from .models import User, Follow
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
-        'pk', 'first_name',
-        'last_name', 'username', 'email'
+        'pk',
+        'first_name',
+        'last_name',
+        'username',
+        'email'
     )
     search_fields = ('username', 'email')
     empty_value_display = '-пусто-'
 
+
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
     list_display = (
-        'pk', 'user', 'author'
+        'pk',
+        'user',
+        'author'
     )
     search_fields = ('user', 'author')
     empty_value_display = '-пусто-'
