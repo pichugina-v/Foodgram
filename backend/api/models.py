@@ -1,4 +1,3 @@
-import re
 from colorfield.fields import ColorField
 
 from django.db import models
@@ -46,8 +45,6 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
-        # return (f'{self.name}, '
-        #         f'{self.measurement_unit}')
 
 
 class Recipe(models.Model):

@@ -1,8 +1,9 @@
-from base64 import encode
 import io
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.decorators import action
@@ -94,8 +95,6 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=False,
             methods=['get'])
     def download_shopping_cart(self, request):
-        buffer = io.BytesIO()
-        pdf_object = canvas.Canvas(buffer)
         result = {}
         recipes_in_user_shopping_list = Recipe.objects.filter(
             shoppinglist__user=request.user
@@ -117,14 +116,19 @@ class RecipeViewSet(ModelViewSet):
                         'amount': amount,
                         'unit': unit
                     }
+        buffer = io.BytesIO()
+        pdfmetrics.registerFont(
+            TTFont('DejaVuSans', 'DejaVuSans.ttf')
+        )
+        pdf_object = canvas.Canvas(buffer)
+        pdf_object.setFont('DejaVuSans', 14)
         height = 800
         for name in result.keys():
             pdf_object.drawString(
                 1,
                 height,
-                str(
-                    f'{name} - {result[name]["amount"]} {result[name]["unit"]}\n'
-                ).encode('utf-8')
+                (f'{name} - {result[name]["amount"]} '
+                 f'{result[name]["unit"]}')
             )
             height -= 20
         pdf_object.showPage()

@@ -17,7 +17,7 @@ const Cart = ({ updateOrders, orders }) => {
       .getRecipes({
         page: 1,
         limit: 999,
-        is_in_shopping_cart: true
+        is_in_shopping_cart: Number(true)
       })
       .then(res => {
         const { results } = res
@@ -57,4 +57,3 @@ const Cart = ({ updateOrders, orders }) => {
 }
 
 export default Cart
-

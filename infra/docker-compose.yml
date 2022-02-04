@@ -20,6 +20,9 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     restart: always
+    volumes:
+      - static_value:/app_code/static_backend/
+      - media_value:/app_code/media_backend/
     ports:
      - "8000:8000"
     depends_on:
@@ -39,3 +42,9 @@ services:
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
       - ../docs/openapi-schema.yml:/usr/share/nginx/html/api/docs/openapi-schema.yml
+      - static_value:/var/html/static_backend/
+      - media_value:/var/html/media_backend/
+
+volumes:
+  static_value:
+  media_value:
