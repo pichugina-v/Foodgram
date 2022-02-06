@@ -8,17 +8,19 @@ sys.path.append(os.path.abspath('../'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'foodgram.settings')
 django.setup()
 
-from api.models import Ingredient
 
-
-def load_data_to_db(file, model):
-    with open(file, 'r', encoding='utf-8') as ingredients_data:
-        reader = csv.reader(ingredients_data, delimiter=',')
+def main():
+    from api.models import Ingredient
+    with open(
+        'ingredients.csv', 'r', encoding='utf-8'
+    ) as ingredients_data:
+        reader = csv.reader(ingredients_data)
         for row in reader:
-            model.objects.create(
+            Ingredient.objects.create(
                 name=row[0],
                 measurement_unit=row[1]
             )
 
 
-load_data_to_db('ingredients.csv', Ingredient)
+if __name__ == '__main__':
+    main()

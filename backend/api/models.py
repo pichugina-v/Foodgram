@@ -2,8 +2,25 @@ from colorfield.fields import ColorField
 
 from django.db import models
 from django.db.models.fields.related import ForeignKey
+from django.forms import ValidationError
 
 from users.models import User
+
+
+def validate_cooking_time(value):
+    if value < 1:
+        raise ValidationError(
+            ('Время приготовления не может '
+             'составлять менее одной минуты.')
+        )
+
+
+def validate_amount(value):
+    if value < 1:
+        raise ValidationError(
+            ('Количество ингредиента не может '
+             'быть меньше единицы.')
+        )
 
 
 class Tag(models.Model):
@@ -75,7 +92,8 @@ class Recipe(models.Model):
         verbose_name='Теги'
     )
     cooking_time = models.PositiveSmallIntegerField(
-        verbose_name='Время приготовления'
+        verbose_name='Время приготовления',
+        validators=[validate_cooking_time]
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -108,7 +126,8 @@ class RecipeIngredientAmount(models.Model):
         related_name='ingredient_in_recipe'
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество'
+        verbose_name='Количество',
+        validators=[validate_amount]
     )
 
     class Meta:

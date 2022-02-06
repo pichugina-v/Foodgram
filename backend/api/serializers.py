@@ -158,18 +158,29 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def set_tags_and_ingredients(self, tags, ingredients, recipe):
+        # if not ingredients:
+        #     raise serializers.ValidationError(
+        #         'Поле "Ингредиент" обязательно для заполнения'
+        #     )
         for ingredient in ingredients:
             RecipeIngredientAmount.objects.create(
                 ingredient=ingredient['ingredient'],
                 amount=ingredient['amount'],
                 recipe=recipe
             )
+        # if not tags:
+        #     raise serializers.ValidationError(
+        #         ('Для создание рецепта '
+        #          'необходимо выбрать минимум один тег')
+        #     )
         recipe.tags.set(tags)
         return recipe
 
     def check_value_exists(self, obj, model_name):
         user = self.context['request'].user
-        if model_name.objects.filter(user=user, recipe=obj).exists():
+        if (user.id is not None and model_name.objects.filter(
+            user=user, recipe=obj
+        ).exists()):
             return True
         return False
 

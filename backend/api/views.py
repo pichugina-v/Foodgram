@@ -7,8 +7,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -16,6 +15,7 @@ from .filters import (
     RecipeFilter,
     IngredientFilter
 )
+from foodgram.paginators import RecipePagination
 from .models import (
     Favorite,
     RecipeIngredientAmount,
@@ -24,7 +24,9 @@ from .models import (
     Ingredient,
     Recipe
 )
-from foodgram.paginators import RecipePagination
+from .permissions import (
+    IsAuthorOrReadOnly
+)
 from .serializers import (
     TagSerializer,
     IngredientSerializer,
@@ -50,6 +52,7 @@ class IngredientViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
+    permission_classes = [IsAuthorOrReadOnly]
     filterset_class = RecipeFilter
     filter_backends = [DjangoFilterBackend]
     pagination_class = RecipePagination
@@ -63,37 +66,70 @@ class RecipeViewSet(ModelViewSet):
         serializer.save(author=self.request.user)
 
     @action(detail=True,
-            methods=['post', 'delete'])
+            methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         user = request.user
         recipe = Recipe.objects.get(pk=pk)
+        favorite_recipe = Favorite.objects.filter(
+            user=user,
+            recipe=recipe
+        )
+        if favorite_recipe.exists():
+            return Response(
+                {"errors": "Рецепт уже добавлен в избранное"}
+            )
         if request.method == 'POST':
             Favorite.objects.create(
                 user=user,
                 recipe=recipe
             )
             serializer = RecipeShortenedSerializer(recipe)
-            return Response(serializer.data)
-        get_object_or_404(Favorite, user=user, recipe=recipe).delete()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        if favorite_recipe.count() == 0:
+            return Response(
+                {"errors": "В Вашем списке избранного нет выбранного рецепта"}
+            )
+        favorite_recipe.delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
-            methods=['post', 'delete'])
+            methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         user = request.user
         recipe = Recipe.objects.get(pk=pk)
+        purchase = ShoppingList.objects.filter(
+            user=user,
+            recipe=recipe
+        )
+        if purchase.exists():
+            return Response(
+                {"errors": "Рецепт уже добавлен в список покупок"}
+            )
         if request.method == 'POST':
             ShoppingList.objects.create(
                 user=user,
                 recipe=recipe
             )
             serializer = RecipeShortenedSerializer(recipe)
-            return Response(serializer.data)
-        get_object_or_404(ShoppingList, user=user, recipe=recipe).delete()
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        if purchase.count() == 0:
+            return Response(
+                {"errors": "В Вашем списке покупок нет выбранного рецепта"}
+            )
+        purchase.delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
-            methods=['get'])
+            methods=['get'],
+            permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         result = {}
         recipes_in_user_shopping_list = Recipe.objects.filter(

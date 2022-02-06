@@ -36,12 +36,21 @@ class UserViewSet(UserViewSet):
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
+        subscription = Follow.objects.filter(user=user, author=author)
         if request.method == 'POST':
+            if subscription.exists():
+                return Response(
+                    {"errors": "Подписка уже существует"}
+                )
             Follow.objects.create(user=user, author=author)
             serializer = FollowSerializer(
                 author,
                 context={'request': request}
             )
-            return Response(serializer.data)
-        get_object_or_404(Follow, user=user, author=author).delete()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if subscription.count() == 0:
+            return Response(
+                {"errors": "Подписка не существует"}
+            )
+        subscription.delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
