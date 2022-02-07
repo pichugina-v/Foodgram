@@ -17,6 +17,7 @@ DUPLICATE_INGREDIENTS = ('Ингредиенты в рецепте '
 INGREDIENTS_NOT_NULL = 'Укажите минимум один игредиент'
 TAGS_NOT_NULL = 'Укажите минимум один тег'
 
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
