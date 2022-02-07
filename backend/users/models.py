@@ -54,6 +54,12 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        constraints = [
+            models.CheckConstraint(
+                name='check_self_following',
+                check=~models.Q(user=models.F('author'))
+            )
+        ]
 
     def __str__(self):
         return (f'Подписчик: {self.user.username}, '

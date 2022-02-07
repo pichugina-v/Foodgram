@@ -7,7 +7,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.permissions import (
+    SAFE_METHODS,
+    IsAuthenticated
+)
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -18,7 +21,6 @@ from .filters import (
 from foodgram.paginators import RecipePagination
 from .models import (
     Favorite,
-    RecipeIngredientAmount,
     ShoppingList,
     Tag,
     Ingredient,
@@ -34,6 +36,16 @@ from .serializers import (
     RecipeCreateSerializer,
     RecipeShortenedSerializer
 )
+from .utils import create_shopping_cart
+
+RECIPE_ALREADY_IN_FAVORITE = ('Рецепт уже добавлен '
+                              'в Ваш список избранного')
+RECIPE_ALREADY_IN_SHOPPING_LIST = ('Рецепт уже добавлен '
+                                   'в Ваш список покупок')
+RECIPE_DOES_NOT_EXIST_IN_FAVORITE = ('В Вашем списке избранного '
+                                     'нет выбранного рецепта')
+RECIPE_DOES_NOT_EXIST_IN_SHOPPING_LIST = ('В Вашем списке покупок '
+                                          'нет выбранного рецепта')
 
 
 class TagViewSet(ModelViewSet):
@@ -75,7 +87,8 @@ class RecipeViewSet(ModelViewSet):
         if request.method == 'POST':
             if favorite_recipe.exists():
                 return Response(
-                    {"errors": "Рецепт уже добавлен в избранное"}
+                    {"errors": RECIPE_ALREADY_IN_FAVORITE},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             Favorite.objects.create(
                 user=user,
@@ -88,7 +101,8 @@ class RecipeViewSet(ModelViewSet):
             )
         if favorite_recipe.count() == 0:
             return Response(
-                {"errors": "В Вашем списке избранного нет выбранного рецепта"}
+                {"errors": RECIPE_DOES_NOT_EXIST_IN_FAVORITE},
+                status=status.HTTP_400_BAD_REQUEST
             )
         favorite_recipe.delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
@@ -106,7 +120,8 @@ class RecipeViewSet(ModelViewSet):
         if request.method == 'POST':
             if purchase.exists():
                 return Response(
-                    {"errors": "Рецепт уже добавлен в список покупок"}
+                    {"errors": RECIPE_ALREADY_IN_SHOPPING_LIST},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             ShoppingList.objects.create(
                 user=user,
@@ -119,7 +134,8 @@ class RecipeViewSet(ModelViewSet):
             )
         if purchase.count() == 0:
             return Response(
-                {"errors": "В Вашем списке покупок нет выбранного рецепта"}
+                {"errors": RECIPE_DOES_NOT_EXIST_IN_SHOPPING_LIST},
+                status=status.HTTP_400_BAD_REQUEST
             )
         purchase.delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
@@ -128,27 +144,7 @@ class RecipeViewSet(ModelViewSet):
             methods=['get'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        result = {}
-        recipes_in_user_shopping_list = Recipe.objects.filter(
-            shoppinglist__user=request.user
-        )
-        for recipe in recipes_in_user_shopping_list:
-            ingredients = RecipeIngredientAmount.objects.filter(
-                recipe=recipe
-            )
-            for ingredient in ingredients:
-                name, unit, amount = (
-                    ingredient.ingredient.name,
-                    ingredient.ingredient.measurement_unit,
-                    ingredient.amount
-                )
-                if name in result.keys():
-                    result[name]['amount'] += amount
-                else:
-                    result[name] = {
-                        'amount': amount,
-                        'unit': unit
-                    }
+        shopping_cart = create_shopping_cart(request)
         buffer = io.BytesIO()
         pdfmetrics.registerFont(
             TTFont('DejaVuSans', 'DejaVuSans.ttf')
@@ -156,12 +152,12 @@ class RecipeViewSet(ModelViewSet):
         pdf_object = canvas.Canvas(buffer)
         pdf_object.setFont('DejaVuSans', 14)
         height = 800
-        for name in result.keys():
+        for name in shopping_cart.keys():
             pdf_object.drawString(
                 1,
                 height,
-                (f'{name} - {result[name]["amount"]} '
-                 f'{result[name]["unit"]}')
+                (f'{name} - {shopping_cart[name]["amount"]} '
+                 f'{shopping_cart[name]["unit"]}')
             )
             height -= 20
         pdf_object.showPage()

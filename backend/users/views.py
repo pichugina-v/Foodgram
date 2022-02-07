@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -8,6 +9,10 @@ from rest_framework.response import Response
 from foodgram.paginators import RecipePagination
 from .serializers import FollowSerializer
 from .models import Follow, User
+
+SUBSCRIPTION_ALREADY_EXISTS = 'Подписка уже существует'
+SUBSCRIPTION_DOES_NOT_EXIST = 'Подписка не существует'
+SELF_FOLLOWING_FORBIDDEN = 'Вы не можете подписаться на самого себя'
 
 
 class UserViewSet(UserViewSet):
@@ -40,17 +45,31 @@ class UserViewSet(UserViewSet):
         if request.method == 'POST':
             if subscription.exists():
                 return Response(
-                    {"errors": "Подписка уже существует"}
+                    {"errors": SUBSCRIPTION_ALREADY_EXISTS},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-            Follow.objects.create(user=user, author=author)
-            serializer = FollowSerializer(
-                author,
-                context={'request': request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            try:
+                Follow.objects.create(user=user, author=author)
+                serializer = FollowSerializer(
+                    author,
+                    context={'request': request}
+                )
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+            except IntegrityError:
+                return Response(
+                    {'errors': SELF_FOLLOWING_FORBIDDEN},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         if subscription.count() == 0:
             return Response(
-                {"errors": "Подписка не существует"}
+                {"errors": SUBSCRIPTION_DOES_NOT_EXIST},
+                status=status.HTTP_400_BAD_REQUEST
             )
         subscription.delete()
-        return Response(data=None, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            data=None,
+            status=status.HTTP_204_NO_CONTENT
+        )
