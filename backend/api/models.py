@@ -8,7 +8,7 @@ from users.models import User
 
 
 def validate_cooking_time(value):
-    if value < 1:
+    if value <= 0:
         raise ValidationError(
             ('Время приготовления не может '
              'составлять менее одной минуты.')
@@ -16,7 +16,7 @@ def validate_cooking_time(value):
 
 
 def validate_amount(value):
-    if value < 1:
+    if value <= 0:
         raise ValidationError(
             ('Количество ингредиента не может '
              'быть меньше единицы.')

@@ -157,23 +157,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
-    def set_tags_and_ingredients(self, tags, ingredients, recipe):
-        # if not ingredients:
-        #     raise serializers.ValidationError(
-        #         'Поле "Ингредиент" обязательно для заполнения'
-        #     )
+    def set_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             RecipeIngredientAmount.objects.create(
                 ingredient=ingredient['ingredient'],
                 amount=ingredient['amount'],
                 recipe=recipe
             )
-        # if not tags:
-        #     raise serializers.ValidationError(
-        #         ('Для создание рецепта '
-        #          'необходимо выбрать минимум один тег')
-        #     )
-        recipe.tags.set(tags)
         return recipe
 
     def check_value_exists(self, obj, model_name):
@@ -185,22 +175,22 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return False
 
     def create(self, validated_data):
+        author = self.context['request'].user
         ingredients_data = validated_data.pop(
             'ingredient_in_recipe'
         )
         tags_data = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-        return self.set_tags_and_ingredients(
-            tags_data,
+        recipe = Recipe.objects.create(
+            **validated_data,
+            author=author
+        )
+        recipe.tags.set(tags_data)
+        return self.set_ingredients(
             ingredients_data,
             recipe
         )
 
     def update(self, instance, validated_data):
-        ingredients_data = validated_data.pop(
-            'ingredient_in_recipe'
-        )
-        tags_data = validated_data.pop('tags')
         instance.name = validated_data.get('name', instance.name)
         instance.author = validated_data.get('author', instance.author)
         instance.text = validated_data.get('text', instance.text)
@@ -208,13 +198,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.image = validated_data.get('image', instance.image)
+        if self.initial_data.get('tags'):
+            tags_data = validated_data.pop('tags')
+            instance.tags.clear()
+            instance.tags.set(tags_data)
+        if self.initial_data.get('ingredients'):
+            ingredients_data = validated_data.pop(
+                'ingredient_in_recipe'
+            )
+            instance.ingredients.clear()
+            self.set_ingredients(
+                ingredients_data,
+                instance
+            )
         instance.save()
-        RecipeIngredientAmount.objects.filter(recipe=instance).delete()
-        return self.set_tags_and_ingredients(
-            tags_data,
-            ingredients_data,
-            instance
-        )
+        return instance
 
     def get_is_favorited(self, obj):
         return self.check_value_exists(

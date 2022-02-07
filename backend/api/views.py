@@ -25,7 +25,7 @@ from .models import (
     Recipe
 )
 from .permissions import (
-    IsAuthorOrReadOnly
+    IsAuthorOrAuthenticatedOrReadOnly
 )
 from .serializers import (
     TagSerializer,
@@ -52,7 +52,7 @@ class IngredientViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthorOrAuthenticatedOrReadOnly]
     filterset_class = RecipeFilter
     filter_backends = [DjangoFilterBackend]
     pagination_class = RecipePagination
@@ -61,9 +61,6 @@ class RecipeViewSet(ModelViewSet):
         if self.request.method in SAFE_METHODS:
             return RecipeFullSerializer
         return RecipeCreateSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
 
     @action(detail=True,
             methods=['post', 'delete'],
@@ -75,11 +72,11 @@ class RecipeViewSet(ModelViewSet):
             user=user,
             recipe=recipe
         )
-        if favorite_recipe.exists():
-            return Response(
-                {"errors": "Рецепт уже добавлен в избранное"}
-            )
         if request.method == 'POST':
+            if favorite_recipe.exists():
+                return Response(
+                    {"errors": "Рецепт уже добавлен в избранное"}
+                )
             Favorite.objects.create(
                 user=user,
                 recipe=recipe
@@ -106,11 +103,11 @@ class RecipeViewSet(ModelViewSet):
             user=user,
             recipe=recipe
         )
-        if purchase.exists():
-            return Response(
-                {"errors": "Рецепт уже добавлен в список покупок"}
-            )
         if request.method == 'POST':
+            if purchase.exists():
+                return Response(
+                    {"errors": "Рецепт уже добавлен в список покупок"}
+                )
             ShoppingList.objects.create(
                 user=user,
                 recipe=recipe
