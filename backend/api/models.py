@@ -1,3 +1,4 @@
+from enum import unique
 from colorfield.fields import ColorField
 
 from django.db import models
@@ -6,30 +7,33 @@ from django.forms import ValidationError
 
 from users.models import User
 
+COOKING_TIME_AMOUNT_VALIDATION = ('Убедитесь, что это значение '
+                                  'больше либо равно 1')
+
 
 def validate_cooking_time(value):
     if value <= 0:
         raise ValidationError(
-            ('Время приготовления не может '
-             'составлять менее одной минуты.')
+            COOKING_TIME_AMOUNT_VALIDATION
         )
 
 
 def validate_amount(value):
     if value <= 0:
         raise ValidationError(
-            ('Количество ингредиента не может '
-             'быть меньше единицы.')
+            COOKING_TIME_AMOUNT_VALIDATION
         )
 
 
 class Tag(models.Model):
     name = models.CharField(
         verbose_name='Тег',
-        max_length=200
+        max_length=200,
+        unique=True
     )
     hex_code = ColorField(
         verbose_name='Цветовой код',
+        unique=True
     )
     slug = models.SlugField(
         verbose_name='Уникальный идентификатор',
@@ -103,7 +107,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ['pub_date']
+        ordering = ['-pub_date']
 
     def __str__(self):
         return (f'{self.name}, '
@@ -169,7 +173,8 @@ class Favorite(models.Model):
     recipe = ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='is_favorited'
     )
 
     class Meta:

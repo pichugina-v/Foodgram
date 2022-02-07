@@ -8,9 +8,14 @@ from .models import (
     Recipe,
     RecipeIngredientAmount,
     Tag,
-    ShoppingList
+    ShoppingList,
+    COOKING_TIME_AMOUNT_VALIDATION
 )
 
+DUPLICATE_INGREDIENTS = ('Ингредиенты в рецепте '
+                         'не должны дублироваться')
+INGREDIENTS_NOT_NULL = 'Укажите минимум один игредиент'
+TAGS_NOT_NULL = 'Укажите минимум один тег'
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,6 +75,13 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
             'amount'
         )
 
+    def validate_amount(self, amount):
+        if amount <= 0:
+            raise serializers.ValidationError(
+                COOKING_TIME_AMOUNT_VALIDATION
+            )
+        return amount
+
 
 class RecipeFullSerializer(serializers.ModelSerializer):
     tags = TagSerializer(
@@ -104,7 +116,9 @@ class RecipeFullSerializer(serializers.ModelSerializer):
 
     def get_ingredients(self, obj):
         ingredients = obj.ingredient_in_recipe.all()
-        return RecipeIngredientAmountSerializer(ingredients, many=True).data
+        return RecipeIngredientAmountSerializer(
+            ingredients, many=True
+        ).data
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
@@ -156,6 +170,27 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
+
+    def validate_ingredients(self, ingredients):
+        if not ingredients:
+            raise serializers.ValidationError(
+                INGREDIENTS_NOT_NULL
+            )
+        ingredients_names = [
+            ingredient['ingredient'] for ingredient in ingredients
+        ]
+        if len(ingredients_names) > len(set(ingredients_names)):
+            raise serializers.ValidationError(
+                DUPLICATE_INGREDIENTS
+            )
+        return ingredients
+
+    def validate_tags(self, tags):
+        if not tags:
+            raise serializers.ValidationError(
+                TAGS_NOT_NULL
+            )
+        return tags
 
     def set_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:

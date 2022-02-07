@@ -12,8 +12,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
         'email'
     )
-    search_fields = ('username', 'email')
-    empty_value_display = '-пусто-'
+    list_filter = ('username', 'email')
 
 
 @admin.register(Follow)
@@ -24,4 +23,3 @@ class FollowAdmin(admin.ModelAdmin):
         'author'
     )
     search_fields = ('user', 'author')
-    empty_value_display = '-пусто-'

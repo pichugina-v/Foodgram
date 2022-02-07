@@ -42,10 +42,11 @@ RECIPE_ALREADY_IN_FAVORITE = ('Рецепт уже добавлен '
                               'в Ваш список избранного')
 RECIPE_ALREADY_IN_SHOPPING_LIST = ('Рецепт уже добавлен '
                                    'в Ваш список покупок')
-RECIPE_DOES_NOT_EXIST_IN_FAVORITE = ('В Вашем списке избранного '
-                                     'нет выбранного рецепта')
-RECIPE_DOES_NOT_EXIST_IN_SHOPPING_LIST = ('В Вашем списке покупок '
-                                          'нет выбранного рецепта')
+RECIPE_IS_NOT_IN_FAVORITE = ('В Вашем списке избранного '
+                             'нет выбранного рецепта')
+RECIPE_IS_NOT_IN_SHOPPING_LIST = ('В Вашем списке покупок '
+                                  'нет выбранного рецепта')
+PDF_FILENAME = 'Список игредиентов.pdf'
 
 
 class TagViewSet(ModelViewSet):
@@ -101,7 +102,7 @@ class RecipeViewSet(ModelViewSet):
             )
         if favorite_recipe.count() == 0:
             return Response(
-                {"errors": RECIPE_DOES_NOT_EXIST_IN_FAVORITE},
+                {"errors": RECIPE_IS_NOT_IN_FAVORITE},
                 status=status.HTTP_400_BAD_REQUEST
             )
         favorite_recipe.delete()
@@ -134,7 +135,7 @@ class RecipeViewSet(ModelViewSet):
             )
         if purchase.count() == 0:
             return Response(
-                {"errors": RECIPE_DOES_NOT_EXIST_IN_SHOPPING_LIST},
+                {"errors": RECIPE_IS_NOT_IN_SHOPPING_LIST},
                 status=status.HTTP_400_BAD_REQUEST
             )
         purchase.delete()
@@ -166,5 +167,5 @@ class RecipeViewSet(ModelViewSet):
         return FileResponse(
             buffer,
             as_attachment=True,
-            filename='Список игредиентов.pdf'
+            filename=PDF_FILENAME
         )

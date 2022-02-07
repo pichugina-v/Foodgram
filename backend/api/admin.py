@@ -5,6 +5,8 @@ from .models import (
     Ingredient,
     RecipeIngredientAmount,
     Recipe,
+    ShoppingList,
+    Favorite
 )
 
 
@@ -22,7 +24,7 @@ class TagAdmin(admin.ModelAdmin):
         'slug'
     )
     search_fields = ('name', 'slug')
-    list_filter = ('name', 'slug')
+    list_filter = ('slug',)
 
 
 @admin.register(Ingredient)
@@ -53,11 +55,35 @@ class RecipeAdmin(admin.ModelAdmin):
         'id',
         'author',
         'name',
-        'image',
-        'text',
-        'cooking_time',
-        'pub_date'
+        'get_recipe_favorited'
     )
+    readonly_fields = ('get_recipe_favorited', )
     inlines = (Recipe_inline,)
     search_fields = ('name', 'tags', 'author')
-    list_filter = ('name', 'author')
+    list_filter = ('tags', 'pub_date')
+
+    def get_recipe_favorited(self, obj):
+        return obj.is_favorited.count()
+
+    get_recipe_favorited.short_description = ('Количество добавлений '
+                                              'рецепта в избранное')
+
+
+@admin.register(ShoppingList)
+class ShoppingListAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'recipe'
+    )
+    search_fields = ('user', 'recipe')
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'recipe'
+    )
+    search_fields = ('user', 'recipe')
