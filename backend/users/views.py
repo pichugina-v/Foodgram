@@ -10,6 +10,7 @@ from foodgram.paginators import RecipePagination
 from .serializers import FollowSerializer
 from .models import Follow, User
 
+
 SUBSCRIPTION_ALREADY_EXISTS = 'Подписка уже существует'
 SUBSCRIPTION_DOES_NOT_EXIST = 'Подписка не существует'
 SELF_FOLLOWING_FORBIDDEN = 'Вы не можете подписаться на самого себя'
