@@ -16,7 +16,7 @@ class RecipeFilter(filters.FilterSet):
         field_name='is_in_shopping_cart',
         method='shopping_cart_filter'
     )
-    tags = filters.CharFilter(
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug'
     )
 

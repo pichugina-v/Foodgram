@@ -4,7 +4,7 @@ from .models import (
 )
 
 
-def create_shopping_cart(request):
+def collect_shopping_cart(request):
     result = {}
     recipes_in_user_shopping_list = Recipe.objects.filter(
         shoppinglist__user=request.user

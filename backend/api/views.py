@@ -14,11 +14,11 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from foodgram.paginators import RecipePagination
 from .filters import (
     RecipeFilter,
     IngredientFilter
 )
-from foodgram.paginators import RecipePagination
 from .models import (
     Favorite,
     ShoppingList,
@@ -36,7 +36,7 @@ from .serializers import (
     RecipeCreateSerializer,
     RecipeShortenedSerializer
 )
-from .utils import create_shopping_cart
+from .utils import collect_shopping_cart
 
 RECIPE_ALREADY_IN_FAVORITE = ('Рецепт уже добавлен '
                               'в Ваш список избранного')
@@ -145,7 +145,7 @@ class RecipeViewSet(ModelViewSet):
             methods=['get'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        shopping_cart = create_shopping_cart(request)
+        shopping_cart = collect_shopping_cart(request)
         buffer = io.BytesIO()
         pdfmetrics.registerFont(
             TTFont('DejaVuSans', 'DejaVuSans.ttf')

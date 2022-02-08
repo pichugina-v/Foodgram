@@ -2,8 +2,8 @@ from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from .models import User, Follow
 from api.models import Recipe
+from .models import User, Follow
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
