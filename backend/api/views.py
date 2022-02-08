@@ -38,6 +38,7 @@ from .serializers import (
 )
 from .utils import collect_shopping_cart
 
+
 RECIPE_ALREADY_IN_FAVORITE = ('Рецепт уже добавлен '
                               'в Ваш список избранного')
 RECIPE_ALREADY_IN_SHOPPING_LIST = ('Рецепт уже добавлен '

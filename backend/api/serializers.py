@@ -12,6 +12,7 @@ from .models import (
     COOKING_TIME_AMOUNT_VALIDATION
 )
 
+
 DUPLICATE_INGREDIENTS = ('Ингредиенты в рецепте '
                          'не должны дублироваться')
 INGREDIENTS_NOT_NULL = 'Укажите минимум один игредиент'
