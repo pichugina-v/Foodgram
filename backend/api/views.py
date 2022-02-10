@@ -40,14 +40,18 @@ from .serializers import (
 from .utils import collect_ingredients
 
 
-RECIPE_ALREADY_IN_FAVORITE = ('Рецепт уже добавлен '
-                              'в Ваш список избранного')
-RECIPE_ALREADY_IN_SHOPPING_LIST = ('Рецепт уже добавлен '
-                                   'в Ваш список покупок')
-RECIPE_IS_NOT_IN_FAVORITE = ('В Вашем списке избранного '
-                             'нет выбранного рецепта')
-RECIPE_IS_NOT_IN_SHOPPING_LIST = ('В Вашем списке покупок '
-                                  'нет выбранного рецепта')
+FAVORITE_ERRORS = {
+    'exists': ('Рецепт уже добавлен '
+               'в Ваш список избранного'),
+    'does_not_exist': ('В Вашем списке избранного '
+                       'нет выбранного рецепта')
+}
+SHOPPING_LIST_ERRORS = {
+    'exists': ('Рецепт уже добавлен '
+               'в Ваш список покупок'),
+    'does_not_exist': ('В Вашем списке покупок '
+                       'нет выбранного рецепта')
+}
 PDF_FILENAME = 'Список игредиентов.pdf'
 
 
@@ -77,7 +81,7 @@ class RecipeViewSet(ModelViewSet):
             return RecipeFullSerializer
         return RecipeCreateSerializer
 
-    def add_delete_recipe(self, model, request, pk):
+    def add_delete_recipe(self, request, pk, model, errors):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         selected_recipe = model.objects.filter(
@@ -87,7 +91,7 @@ class RecipeViewSet(ModelViewSet):
         if request.method == 'POST':
             if selected_recipe.exists():
                 return Response(
-                    {"errors": RECIPE_ALREADY_IN_SHOPPING_LIST},
+                    {"errors": errors.get('exists')},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             model.objects.create(
@@ -101,7 +105,7 @@ class RecipeViewSet(ModelViewSet):
             )
         if selected_recipe.count() == 0:
             return Response(
-                {"errors": RECIPE_IS_NOT_IN_SHOPPING_LIST},
+                {"errors": errors.get('does_not_exist')},
                 status=status.HTTP_400_BAD_REQUEST
             )
         selected_recipe.delete()
@@ -112,7 +116,10 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         return self.add_delete_recipe(
-            Favorite, request, pk
+            request, 
+            pk,
+            Favorite,
+            FAVORITE_ERRORS
         )
 
     @action(detail=True,
@@ -120,7 +127,10 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         return self.add_delete_recipe(
-            ShoppingList, request, pk
+            request,
+            pk,
+            ShoppingList,
+            SHOPPING_LIST_ERRORS
         )
 
     @action(detail=False,
