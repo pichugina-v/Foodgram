@@ -8,16 +8,15 @@ from .models import (
     Recipe,
     RecipeIngredientAmount,
     Tag,
-    ShoppingList,
-    COOKING_TIME_AMOUNT_VALIDATION
+    ShoppingList
 )
+from .validators import COOKING_TIME_AMOUNT_VALIDATION
 
 
 DUPLICATE_INGREDIENTS = ('Ингредиенты в рецепте '
                          'не должны дублироваться')
 INGREDIENTS_NOT_NULL = 'Укажите минимум один игредиент'
 TAGS_NOT_NULL = 'Укажите минимум один тег'
-
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -205,11 +204,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def check_value_exists(self, obj, model_name):
         user = self.context['request'].user
-        if (user.id is not None and model_name.objects.filter(
+        return (user.id is not None and model_name.objects.filter(
             user=user, recipe=obj
-        ).exists()):
-            return True
-        return False
+        ).exists())
 
     def create(self, validated_data):
         author = self.context['request'].user
@@ -228,18 +225,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.author = validated_data.get('author', instance.author)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
-        instance.image = validated_data.get('image', instance.image)
-        if self.initial_data.get('tags'):
+        if self.validated_data.get('tags'):
             tags_data = validated_data.pop('tags')
             instance.tags.clear()
             instance.tags.set(tags_data)
-        if self.initial_data.get('ingredients'):
+        if self.validated_data.get('ingredient_in_recipe'):
             ingredients_data = validated_data.pop(
                 'ingredient_in_recipe'
             )
@@ -248,8 +238,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredients_data,
                 instance
             )
-        instance.save()
-        return instance
+        return super().update(instance, validated_data)
 
     def get_is_favorited(self, obj):
         return self.check_value_exists(

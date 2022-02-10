@@ -1,27 +1,14 @@
+from email.policy import default
 from colorfield.fields import ColorField
 from django.db import models
 from django.db.models.fields.related import ForeignKey
 from django.forms import ValidationError
 
 from users.models import User
-
-COOKING_TIME_AMOUNT_VALIDATION = ('Убедитесь, что это значение '
-                                  'больше либо равно 1')
-
-
-def validate_cooking_time(value):
-    if value <= 0:
-        raise ValidationError(
-            COOKING_TIME_AMOUNT_VALIDATION
-        )
-
-
-def validate_amount(value):
-    if value <= 0:
-        raise ValidationError(
-            COOKING_TIME_AMOUNT_VALIDATION
-        )
-
+from .validators import (
+    validate_amount,
+    validate_cooking_time
+)
 
 class Tag(models.Model):
     name = models.CharField(
@@ -31,7 +18,8 @@ class Tag(models.Model):
     )
     hex_code = ColorField(
         verbose_name='Цветовой код',
-        unique=True
+        unique=True,
+        default='#FF0000'
     )
     slug = models.SlugField(
         verbose_name='Уникальный идентификатор',
@@ -135,6 +123,12 @@ class RecipeIngredientAmount(models.Model):
     class Meta:
         verbose_name = 'Количество ингредиентов в рецепте'
         verbose_name_plural = 'Количество ингредиентов в рецепте'
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_ingredient_in_recipe',
+                fields=['ingredient', 'recipe']
+            )
+        ]
 
     def __str__(self):
         return (f'{self.ingredient} '
@@ -156,6 +150,12 @@ class ShoppingList(models.Model):
     class Meta:
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_recipe_in_user_list',
+                fields=['recipe', 'user']
+            )
+        ]
 
     def __str__(self):
         return (f'{self.recipe} в списке '
@@ -178,6 +178,12 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Список избранных рецептов'
         verbose_name_plural = 'Списки избранных рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                name='unique_recipe_in_user_favorite',
+                fields=['recipe', 'user']
+            )
+        ]
 
     def __str__(self):
         return (f'{self.recipe} в списке '

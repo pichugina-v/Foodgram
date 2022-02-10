@@ -10,7 +10,7 @@ from .models import (
 )
 
 
-class Recipe_inline(admin.TabularInline):
+class RecipeInline(admin.TabularInline):
     model = RecipeIngredientAmount
     extra = 4
 
@@ -34,7 +34,7 @@ class IngredientAdmin(admin.ModelAdmin):
         'name',
         'measurement_unit'
     )
-    inlines = (Recipe_inline,)
+    inlines = (RecipeInline,)
     search_fields = ('name',)
     list_filter = ('measurement_unit',)
 
@@ -58,7 +58,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'get_recipe_favorited'
     )
     readonly_fields = ('get_recipe_favorited', )
-    inlines = (Recipe_inline,)
+    inlines = (RecipeInline,)
     search_fields = ('name', 'tags', 'author')
     list_filter = ('tags', 'pub_date')
 

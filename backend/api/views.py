@@ -1,11 +1,12 @@
 import io
+from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import status
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     SAFE_METHODS,
@@ -36,7 +37,7 @@ from .serializers import (
     RecipeCreateSerializer,
     RecipeShortenedSerializer
 )
-from .utils import collect_shopping_cart
+from .utils import collect_ingredients
 
 
 RECIPE_ALREADY_IN_FAVORITE = ('Рецепт уже добавлен '
@@ -76,23 +77,20 @@ class RecipeViewSet(ModelViewSet):
             return RecipeFullSerializer
         return RecipeCreateSerializer
 
-    @action(detail=True,
-            methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated])
-    def favorite(self, request, pk=None):
+    def add_delete_recipe(self, model, request, pk):
         user = request.user
-        recipe = Recipe.objects.get(pk=pk)
-        favorite_recipe = Favorite.objects.filter(
+        recipe = get_object_or_404(Recipe, pk=pk)
+        selected_recipe = model.objects.filter(
             user=user,
             recipe=recipe
         )
         if request.method == 'POST':
-            if favorite_recipe.exists():
+            if selected_recipe.exists():
                 return Response(
-                    {"errors": RECIPE_ALREADY_IN_FAVORITE},
+                    {"errors": RECIPE_ALREADY_IN_SHOPPING_LIST},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            Favorite.objects.create(
+            model.objects.create(
                 user=user,
                 recipe=recipe
             )
@@ -101,52 +99,35 @@ class RecipeViewSet(ModelViewSet):
                 serializer.data,
                 status=status.HTTP_201_CREATED
             )
-        if favorite_recipe.count() == 0:
+        if selected_recipe.count() == 0:
             return Response(
-                {"errors": RECIPE_IS_NOT_IN_FAVORITE},
+                {"errors": RECIPE_IS_NOT_IN_SHOPPING_LIST},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        favorite_recipe.delete()
+        selected_recipe.delete()
         return Response(data=None, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True,
+            methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk=None):
+        return self.add_delete_recipe(
+            Favorite, request, pk
+        )
 
     @action(detail=True,
             methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        user = request.user
-        recipe = Recipe.objects.get(pk=pk)
-        purchase = ShoppingList.objects.filter(
-            user=user,
-            recipe=recipe
+        return self.add_delete_recipe(
+            ShoppingList, request, pk
         )
-        if request.method == 'POST':
-            if purchase.exists():
-                return Response(
-                    {"errors": RECIPE_ALREADY_IN_SHOPPING_LIST},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            ShoppingList.objects.create(
-                user=user,
-                recipe=recipe
-            )
-            serializer = RecipeShortenedSerializer(recipe)
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        if purchase.count() == 0:
-            return Response(
-                {"errors": RECIPE_IS_NOT_IN_SHOPPING_LIST},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        purchase.delete()
-        return Response(data=None, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
             methods=['get'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        shopping_cart = collect_shopping_cart(request)
+        ingredients = collect_ingredients(request)
         buffer = io.BytesIO()
         pdfmetrics.registerFont(
             TTFont('DejaVuSans', 'DejaVuSans.ttf')
@@ -154,12 +135,13 @@ class RecipeViewSet(ModelViewSet):
         pdf_object = canvas.Canvas(buffer)
         pdf_object.setFont('DejaVuSans', 14)
         height = 800
-        for name in shopping_cart.keys():
+        for ingredient in ingredients:
             pdf_object.drawString(
                 1,
                 height,
-                (f'{name} - {shopping_cart[name]["amount"]} '
-                 f'{shopping_cart[name]["unit"]}')
+                (f'{ingredient.get("ingredients__name")} - '
+                 f'{ingredient.get("ingredients__measurement_unit")} '
+                 f'{ingredient.get("total_amount")}')
             )
             height -= 20
         pdf_object.showPage()

@@ -1,29 +1,20 @@
+from django.db.models import Sum
+
 from .models import (
-    Recipe,
-    RecipeIngredientAmount
+    Recipe
 )
 
 
-def collect_shopping_cart(request):
-    result = {}
-    recipes_in_user_shopping_list = Recipe.objects.filter(
+def collect_ingredients(request):
+    ingredients = Recipe.objects.filter(
         shoppinglist__user=request.user
-    )
-    for recipe in recipes_in_user_shopping_list:
-        ingredients = RecipeIngredientAmount.objects.filter(
-            recipe=recipe
+    ).values(
+        'ingredients__name',
+        'ingredients__measurement_unit',
+        'ingredient_in_recipe__amount'
+    ).annotate(
+        total_amount=Sum(
+            'ingredient_in_recipe__amount'
         )
-        for ingredient in ingredients:
-            name, unit, amount = (
-                ingredient.ingredient.name,
-                ingredient.ingredient.measurement_unit,
-                ingredient.amount
-            )
-            if name in result.keys():
-                result[name]['amount'] += amount
-            else:
-                result[name] = {
-                    'amount': amount,
-                    'unit': unit
-                }
-    return result
+    )
+    return ingredients
