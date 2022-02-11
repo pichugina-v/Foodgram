@@ -30,12 +30,14 @@ from .models import (
 from .permissions import (
     IsAuthorOrAuthenticatedOrReadOnly
 )
-from .serializers import (
+from .serializers.nested_serializers import (
+        RecipeShortenedSerializer
+)
+from .serializers.serializers import (
     TagSerializer,
     IngredientSerializer,
     RecipeFullSerializer,
     RecipeCreateSerializer,
-    RecipeShortenedSerializer
 )
 from .utils import collect_ingredients
 

@@ -2,7 +2,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from users.serializers import UserSerializer
-from .models import (
+from ..models import (
     Favorite,
     Ingredient,
     Recipe,
@@ -10,13 +10,14 @@ from .models import (
     Tag,
     ShoppingList
 )
-from .validators import COOKING_TIME_AMOUNT_VALIDATION
+from ..validators import COOKING_TIME_AMOUNT_VALIDATION
 
 
 DUPLICATE_INGREDIENTS = ('Ингредиенты в рецепте '
                          'не должны дублироваться')
 INGREDIENTS_NOT_NULL = 'Укажите минимум один игредиент'
 TAGS_NOT_NULL = 'Укажите минимум один тег'
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,17 +49,6 @@ class RecipeIngredientAmountSerializer(serializers.ModelSerializer):
             'name',
             'measurement_unit',
             'amount'
-        )
-
-
-class RecipeShortenedSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
         )
 
 
@@ -123,19 +113,15 @@ class RecipeFullSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
-        if (user.id is not None and Favorite.objects.filter(
+        return (user.id is not None and Favorite.objects.filter(
                 user=user, recipe=obj
-        ).exists()):
-            return True
-        return False
+        ).exists())
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
-        if (user.id is not None and ShoppingList.objects.filter(
+        return (user.id is not None and ShoppingList.objects.filter(
                 user=user, recipe=obj
-        ).exists()):
-            return True
-        return False
+        ).exists())
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):

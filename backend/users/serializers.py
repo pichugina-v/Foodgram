@@ -3,6 +3,9 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from api.models import Recipe
+from api.serializers.nested_serializers import (
+    RecipeShortenedSerializer
+)
 from .models import User, Follow
 
 
@@ -35,11 +38,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        if (user.id is not None and Follow.objects.filter(
-                user=self.context['request'].user, author=obj
-                ).exists()):
-            return True
-        return False
+        return (user.id is not None and Follow.objects.filter(
+            user=self.context['request'].user, author=obj
+        ).exists())
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -66,7 +67,6 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
     def get_recipes(self, obj):
-        from api.serializers import RecipeShortenedSerializer
         recipes_limit = self.context['request'].query_params.get(
             'recipes_limit', None
         )
