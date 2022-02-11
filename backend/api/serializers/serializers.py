@@ -211,11 +211,11 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
 
     def update(self, instance, validated_data):
-        if self.validated_data.get('tags'):
+        if validated_data.get('tags'):
             tags_data = validated_data.pop('tags')
             instance.tags.clear()
             instance.tags.set(tags_data)
-        if self.validated_data.get('ingredient_in_recipe'):
+        if validated_data.get('ingredient_in_recipe'):
             ingredients_data = validated_data.pop(
                 'ingredient_in_recipe'
             )

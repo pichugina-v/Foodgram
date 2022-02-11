@@ -1,8 +1,6 @@
-from email.policy import default
 from colorfield.fields import ColorField
 from django.db import models
 from django.db.models.fields.related import ForeignKey
-from django.forms import ValidationError
 
 from users.models import User
 from .validators import (
