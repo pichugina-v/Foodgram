@@ -1,10 +1,13 @@
+from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from api.models import Recipe
 from api.serializers.nested_serializers import RecipeShortenedSerializer
-from .models import User, Follow
+from .models import Follow
+
+User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
