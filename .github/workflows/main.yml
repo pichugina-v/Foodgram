@@ -45,11 +45,13 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
+          context: backend/
           tags: psyde26/foodgram_backend:latest
       - name: Push frontend to Docker Hub
         uses: docker/build-push-action@v2
         with:
           push: true
+          context: frontend/
           tags: psyde26/foodgram_frontend:latest
 
   deploy:
@@ -60,7 +62,7 @@ jobs:
         - name: executing remote ssh commands to deploy
           uses: appleboy/ssh-action@master
           with:
-            host: ${{ secrets.HOST }} 
+            host: ${{ secrets.HOST }}
             username: ${{ secrets.USER }}
             key: ${{ secrets.SSH_KEY }}
             passphrase: ${{ secrets.PASSPHRASE }}
