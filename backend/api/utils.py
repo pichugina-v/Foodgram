@@ -4,7 +4,7 @@ from .models import Recipe
 
 
 def collect_ingredients(request):
-    ingredients = Recipe.objects.filter(
+    return Recipe.objects.filter(
         shoppinglist__user=request.user
     ).values(
         'ingredients__name',
@@ -15,4 +15,3 @@ def collect_ingredients(request):
             'ingredient_in_recipe__amount'
         )
     )
-    return ingredients
