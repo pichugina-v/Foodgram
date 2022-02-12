@@ -7,9 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from foodgram.paginators import RecipePagination
-from .serializers import FollowSerializer
-from .models import Follow, User
 
+from .models import Follow, User
+from .serializers import FollowSerializer
 
 SUBSCRIPTION_ALREADY_EXISTS = 'Подписка уже существует'
 SUBSCRIPTION_DOES_NOT_EXIST = 'Подписка не существует'

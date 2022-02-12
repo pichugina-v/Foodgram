@@ -2,16 +2,10 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from users.serializers import UserSerializer
-from ..models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredientAmount,
-    Tag,
-    ShoppingList
-)
-from ..validators import COOKING_TIME_AMOUNT_VALIDATION
 
+from ..models import (Favorite, Ingredient, Recipe, RecipeIngredientAmount,
+                      ShoppingList, Tag)
+from ..validators import COOKING_TIME_AMOUNT_VALIDATION
 
 DUPLICATE_INGREDIENTS = ('Ингредиенты в рецепте '
                          'не должны дублироваться')

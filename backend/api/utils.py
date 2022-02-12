@@ -1,8 +1,6 @@
 from django.db.models import Sum
 
-from .models import (
-    Recipe
-)
+from .models import Recipe
 
 
 def collect_ingredients(request):

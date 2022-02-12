@@ -1,46 +1,27 @@
 import io
-from django.shortcuts import get_object_or_404
 
-from django_filters.rest_framework import DjangoFilterBackend
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import mixins, status
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    SAFE_METHODS,
-    IsAuthenticated
-)
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from foodgram.paginators import RecipePagination
-from .filters import (
-    RecipeFilter,
-    IngredientFilter
-)
-from .models import (
-    Favorite,
-    ShoppingList,
-    Tag,
-    Ingredient,
-    Recipe
-)
-from .permissions import (
-    IsAuthorOrAuthenticatedOrReadOnly
-)
-from .serializers.nested_serializers import (
-        RecipeShortenedSerializer
-)
-from .serializers.serializers import (
-    TagSerializer,
-    IngredientSerializer,
-    RecipeFullSerializer,
-    RecipeCreateSerializer,
-)
-from .utils import collect_ingredients
 
+from .filters import IngredientFilter, RecipeFilter
+from .models import Favorite, Ingredient, Recipe, ShoppingList, Tag
+from .permissions import IsAuthorOrAuthenticatedOrReadOnly
+from .serializers.nested_serializers import RecipeShortenedSerializer
+from .serializers.serializers import (IngredientSerializer,
+                                      RecipeCreateSerializer,
+                                      RecipeFullSerializer, TagSerializer)
+from .utils import collect_ingredients
 
 FAVORITE_ERRORS = {
     'exists': ('Рецепт уже добавлен '
