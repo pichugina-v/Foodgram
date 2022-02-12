@@ -25,7 +25,7 @@ class UserViewSet(UserViewSet):
         followings = self.paginate_queryset(
             User.objects.filter(
                 following__user=request.user
-                )
+            )
         )
         serializer = FollowSerializer(
             followings,
