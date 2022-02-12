@@ -20,7 +20,7 @@ class TagAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'hex_code',
+        'color',
         'slug'
     )
     search_fields = ('name', 'slug')

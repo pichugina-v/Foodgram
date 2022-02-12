@@ -14,7 +14,7 @@ class Tag(models.Model):
         max_length=200,
         unique=True
     )
-    hex_code = ColorField(
+    color = ColorField(
         verbose_name='Цветовой код',
         unique=True,
         default='#FF0000'
