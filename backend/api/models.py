@@ -1,6 +1,6 @@
 from colorfield.fields import ColorField
-from django.db import models
 from django.db.models.fields.related import ForeignKey
+from django.db import models
 
 from users.models import User
 from .validators import validate_amount, validate_cooking_time

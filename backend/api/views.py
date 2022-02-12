@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from foodgram.paginators import RecipePagination
-
 from .filters import IngredientFilter, RecipeFilter
 from .models import Favorite, Ingredient, Recipe, ShoppingList, Tag
 from .permissions import IsAuthorOrAuthenticatedOrReadOnly
