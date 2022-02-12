@@ -30,6 +30,7 @@ class RecipeFilter(filters.FilterSet):
            is_favorited__user=self.request.user.id
         )
 
+
     class Meta:
         model = Recipe
         fields = (
