@@ -3,9 +3,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
 from api.models import Recipe
-from api.serializers.nested_serializers import (
-    RecipeShortenedSerializer
-)
+from api.serializers.nested_serializers import RecipeShortenedSerializer
 from .models import User, Follow
 
 
