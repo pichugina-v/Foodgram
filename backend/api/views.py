@@ -6,7 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import mixins, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
@@ -99,7 +99,7 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         return self.add_delete_recipe(
-            request, 
+            request,
             pk,
             Favorite,
             FAVORITE_ERRORS
