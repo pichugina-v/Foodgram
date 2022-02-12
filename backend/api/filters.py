@@ -27,9 +27,8 @@ class RecipeFilter(filters.FilterSet):
 
     def favorite_filter(self, queryset, field_name, value):
         return queryset.filter(
-           is_favorited__user=self.request.user.id
+            is_favorited__user=self.request.user.id
         )
-
 
     class Meta:
         model = Recipe
