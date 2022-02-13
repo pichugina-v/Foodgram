@@ -3,7 +3,7 @@ services:
 
   frontend:
     build:
-      context: ../frontend
+      context: psyde/foodgram_frontend:latest
       dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
@@ -17,7 +17,7 @@ services:
 
   web:
     build:
-      context: ../backend
+      context: psyde/foodgram_backend:latest
       dockerfile: Dockerfile
     restart: always
     volumes:
