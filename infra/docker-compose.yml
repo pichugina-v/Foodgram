@@ -1,11 +1,6 @@
 version: '3.3'
 services:
 
-  frontend:
-    image: psyde26/foodgram_frontend:latest
-    volumes:
-      - ../frontend/:/app/result_build/
-
   db:
     image: postgres:13.0-alpine
     volumes:
@@ -25,6 +20,13 @@ services:
       - db
     env_file:
       - ./.env
+
+  frontend:
+    image: psyde26/foodgram_frontend:latest
+    volumes:
+      - ../frontend/:/app/result_build/
+    depends_on:
+      - web
 
   nginx:
     image: nginx:1.19.3
