@@ -7,8 +7,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'DEFAULT')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '130.193.49.152']
-CSRF_TRUSTED_ORIGINS = ['130.193.49.152']
+ALLOWED_HOSTS = ['*', '51.250.2.51', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['51.250.2.51', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
