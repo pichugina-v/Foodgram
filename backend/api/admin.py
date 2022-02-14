@@ -53,7 +53,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('get_recipe_favorited', )
     inlines = (RecipeInline,)
-    list_filter = ('name', 'tags', 'author',)
+    list_filter = ('name', 'tags', 'author', )
 
     def get_recipe_favorited(self, obj):
         return obj.is_favorited.count()
@@ -69,7 +69,7 @@ class ShoppingListAdmin(admin.ModelAdmin):
         'user',
         'recipe'
     )
-    search_fields = ('user', 'recipe')
+    search_fields = ('user', 'recipe', )
 
 
 @admin.register(Favorite)
@@ -79,4 +79,4 @@ class FavoriteAdmin(admin.ModelAdmin):
         'user',
         'recipe'
     )
-    search_fields = ('user', 'recipe')
+    search_fields = ('user', 'recipe', )
