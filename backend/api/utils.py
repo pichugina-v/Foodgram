@@ -8,10 +8,9 @@ def collect_ingredients(request):
         shoppinglist__user=request.user
     ).values(
         'ingredients__name',
-        'ingredients__measurement_unit',
-        'ingredient_in_recipe__amount'
+        'ingredients__measurement_unit'
     ).annotate(
         total_amount=Sum(
-            'ingredient_in_recipe__amount'
+            'amount'
         )
     )
