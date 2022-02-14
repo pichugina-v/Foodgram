@@ -132,8 +132,8 @@ class RecipeViewSet(ModelViewSet):
                 1,
                 height,
                 (f'{ingredient.get("ingredients__name")} - '
-                 f'{ingredient.get("ingredients__measurement_unit")} '
-                 f'{ingredient.get("total_amount")}')
+                 f'{ingredient.get("total_amount")} '
+                 f'{ingredient.get("ingredients__measurement_unit")}')
             )
             height -= 20
         pdf_object.showPage()

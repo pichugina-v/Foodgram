@@ -7,8 +7,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'DEFAULT')
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '51.250.2.51', 'localhost']
-CSRF_TRUSTED_ORIGINS = ['http://51.250.2.51']
+ALLOWED_HOSTS = ['*', '51.250.2.51', 'localhost', 'psyfoodrgam.ddns.net']
+CSRF_TRUSTED_ORIGINS = ['http://51.250.2.51', 'http://psyfoodrgam.ddns.net']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
