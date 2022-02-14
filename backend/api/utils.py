@@ -11,6 +11,6 @@ def collect_ingredients(request):
         'ingredients__measurement_unit'
     ).annotate(
         total_amount=Sum(
-            'ingredient__amount'
+            'ingredients__amount'
         )
     )
