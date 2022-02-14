@@ -1,4 +1,4 @@
-# Foodgram. ![Foodgram](https://github.com/pichugina-v/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+# Foodgram ![Foodgram](https://github.com/pichugina-v/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
 ```
 
