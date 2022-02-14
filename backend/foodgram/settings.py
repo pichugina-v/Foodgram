@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'DEFAULT')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*', '51.250.2.51', 'localhost']
 CSRF_TRUSTED_ORIGINS = ['http://51.250.2.51']
