@@ -30,7 +30,7 @@ class IngredientAdmin(admin.ModelAdmin):
     )
     inlines = (RecipeInline,)
     search_fields = ('name',)
-    list_filter = ('measurement_unit',)
+    list_filter = ('name',)
 
 
 @admin.register(RecipeIngredientAmount)
@@ -53,8 +53,7 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('get_recipe_favorited', )
     inlines = (RecipeInline,)
-    search_fields = ('name', 'tags', 'author')
-    list_filter = ('tags', 'pub_date')
+    list_filter = ('name', 'tags', 'author',)
 
     def get_recipe_favorited(self, obj):
         return obj.is_favorited.count()

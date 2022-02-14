@@ -1,9 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 
-from .models import Follow
-
-User = get_user_model()
+from .models import Follow, User
 
 
 @admin.register(User)
@@ -15,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
         'email'
     )
-    list_filter = ('username', 'email')
+    list_filter = ('username', 'email', )
 
 
 @admin.register(Follow)
@@ -25,4 +23,4 @@ class FollowAdmin(admin.ModelAdmin):
         'user',
         'author'
     )
-    search_fields = ('user', 'author')
+    search_fields = ('user', 'author', )
