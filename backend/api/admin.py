@@ -29,8 +29,8 @@ class IngredientAdmin(admin.ModelAdmin):
         'measurement_unit'
     )
     inlines = (RecipeInline,)
-    search_fields = ('name',)
-    list_filter = ('name',)
+    search_fields = ('name', )
+    list_filter = ('name', )
 
 
 @admin.register(RecipeIngredientAmount)
