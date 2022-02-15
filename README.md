@@ -17,7 +17,7 @@
 
 ## Начало работы:
 
-* Клонируйте репозиторий `foodgram-progect-react`
+* Клонируйте репозиторий `foodgram-project-react`
 ```bash
 git clone https://github.com/pichugina-v/foodgram-project-react.git
 ```
