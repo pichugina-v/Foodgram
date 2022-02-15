@@ -22,7 +22,7 @@
 git clone https://github.com/pichugina-v/foodgram-project-react.git
 ```
 
-* Перейдите в директорию backend и установите зависимости
+* Перейдите в директорию `backend` и установите зависимости
 ```bash
 cd backend/
 pip install -r requirements.txt
@@ -40,7 +40,7 @@ DB_PORT=5432
 SECRET_KEY=<секретный ключ Django>
 ```
 
-* Перейдите в директорию infra и запустите docker-compose командой 
+* Перейдите в директорию `infra` и запустите `docker-compose` командой 
 ```bash
 cd infra/
 sudo docker-compose up -d --build
@@ -62,7 +62,7 @@ sudo docker-compose exec web python manage.py createsuperuser
 sudo docker-compose exec web python manage.py collectstatic --no-input
 ```
 
-* Загрузите начальные данные в базу данных, для этого зайдите в запущенный контейнер web и выполните команду import_data
+* Загрузите начальные данные в базу данных, для этого зайдите в запущенный контейнер `web` и выполните команду `import_data`
 ```bash
 sudo docker container ls
 sudo docker-compose exec -it <container_id> bash
