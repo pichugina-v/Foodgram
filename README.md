@@ -62,7 +62,7 @@ sudo docker-compose exec web python manage.py createsuperuser
 sudo docker-compose exec web python manage.py collectstatic --no-input
 ```
 
-* Загрузите начальные данные в базу данных, зайдите в запущенный контейнер и выполните команду import_data
+* Загрузите начальные данные в базу данных, для этого зайдите в запущенный контейнер и выполните команду import_data
 ```bash
 sudo docker container ls
 sudo docker-compose exec -it <container_id> bash
