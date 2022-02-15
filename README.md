@@ -1,5 +1,73 @@
-# Foodgram ![Foodgram](https://github.com/pichugina-v/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+# Учебный проект Яндекс.Практикума Foodgram ![Foodgram](https://github.com/pichugina-v/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
+Проект Foodgram - сервис для хранения и обмена рецептами между пользователями. 
+
+Рецепты доступны всем пользователям, в том числе неаутентифицированным, для рецептов настроена фильтрация по тегам.
+
+Для создания новых рецептов пользователю необходимо зарегистрироваться и войти на сайт с использоватем email и пароля, указанных при регистрации. Пользователь может изменить свой пароль при необходимости.
+
+Аутентифицированные пользователи могут создавать новые рецепты и редактировать их. Для этого необходимо заполнить все поля в форме, указав название, ингредиенты, теги, время приготовления, описание и загрузив картинку. При создании рецепта пользователь выбирает теги и ингредиенты для рецепта из предустановленных, права на расширение списка тегов и ингредиентов есть только у администратора.
+
+Аутенфицированные пользователи могут подписываться на других пользователей, посматривать страницы отдельных пользователей с отображением всех рецептов, опубликованных этим пользователем.
+
+Аутентифицированным пользователям доступен просмотр всех рецептов, страниц отдельных рецептов, функционал по добавлению рецептов в избранное, список покупок, выгрузка списка покупок в формате pdf. Выгрузка суммирует все ингредиенты из списка покупок пользователя.
+
+
+# Установка на локальном компьютере:
+
+## Начало работы:
+
+* Клонируйте репозиторий `foodgram-progect-react`
+```bash
+git clone https://github.com/pichugina-v/foodgram-project-react.git
+```
+
+* Перейдите в директорию backend и установите зависимости
+```bash
+cd backend/
+pip install -r requirements.txt
+```
+
+* В корневой директории проекта создайте файл `.env` и заполните переменные окружения
+```python
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+POSTGRES_USER=<логин для подключения к базе данных>
+POSTGRES_PASSWORD=<пароль для подключения к базе данных>
+DB_HOST=db
+DB_PORT=5432
+
+SECRET_KEY=<секретный ключ Django>
+```
+
+* Перейдите в директорию infra и запустите docker-compose командой 
+```bash
+cd infra/
+sudo docker-compose up -d --build
+```
+
+* Примените миграции
+```bash
+sudo docker-compose exec web python manage.py makemigrations --noinput
+sudo docker-compose exec web python manage.py migrate --noinput
+```
+
+* Создайте пользователя с правами администратора
+```bash
+sudo docker-compose exec web python manage.py createsuperuser
+```
+
+* Соберите статику
+```bash
+sudo docker-compose exec web python manage.py collectstatic --no-input
+```
+
+* Загрузите начальные данные в базу данных, зайдите в запущенный контейнер и выполните команду import_data
+```bash
+sudo docker container ls
+sudo docker-compose exec -it <container_id> bash
+python3 manage.py import_data
+```
 
 Проект доступен по ссылке: http://51.250.2.51
 
