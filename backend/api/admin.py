@@ -17,8 +17,8 @@ class TagAdmin(admin.ModelAdmin):
         'color',
         'slug'
     )
-    search_fields = ('name', 'slug')
-    list_filter = ('slug',)
+    search_fields = ('name', 'slug', )
+    list_filter = ('slug', )
 
 
 @admin.register(Ingredient)

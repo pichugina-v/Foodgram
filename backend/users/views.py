@@ -6,7 +6,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from foodgram.paginators import RecipePagination
 from .models import Follow, User
 from .serializers import FollowSerializer
 
@@ -17,7 +16,6 @@ SELF_FOLLOWING_FORBIDDEN = 'Вы не можете подписаться на �
 
 class UserViewSet(UserViewSet):
     permission_classes = [IsAuthenticated]
-    pagination_class = RecipePagination
 
     @action(detail=False,
             methods=['get'])

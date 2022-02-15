@@ -126,8 +126,9 @@ class RecipeViewSet(ModelViewSet):
         )
         pdf_object = canvas.Canvas(buffer)
         pdf_object.setFont('DejaVuSans', 14)
-        height = 800
+        height = 820
         for ingredient in ingredients:
+            pdf_object.setFont('DejaVuSans', 14)
             pdf_object.drawString(
                 1,
                 height,
@@ -136,6 +137,9 @@ class RecipeViewSet(ModelViewSet):
                  f'{ingredient.get("ingredients__measurement_unit")}')
             )
             height -= 20
+            if height < 0:
+                height = 800
+                pdf_object.showPage()
         pdf_object.showPage()
         pdf_object.save()
         buffer.seek(0)
